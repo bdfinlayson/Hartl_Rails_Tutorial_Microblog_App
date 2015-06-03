@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'pry'
 
 describe User do
 
@@ -75,6 +76,11 @@ describe User do
     it { should_not be_valid }
   end
 
+  describe 'with a password that is too short' do
+    before { @user.password = @user.password_confirmation = 'a' * 5 }
+    it { should be_invalid }
+  end
+
   describe 'return value of authenticate method' do
     before { @user.save }
     let(:found_user) { User.find_by(email: @user.email) }
@@ -87,12 +93,7 @@ describe User do
       let(:user_for_invalid_password) { found_user.authenticate('invalid') }
 
       it { should_not eq user_for_invalid_password }
-      specify { expect(user_for_invalid_password).to be_false }
+      specify { expect(user_for_invalid_password).to be false }
     end
-  end
-
-  describe 'with a password that is too short' do
-    before { @user.password = @user.password_confirmation = 'a' * 5 }
-    it { should be_valid }
   end
 end
