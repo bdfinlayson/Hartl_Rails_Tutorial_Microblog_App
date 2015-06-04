@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'rspec/its'
 require 'pry'
 
 describe User do
