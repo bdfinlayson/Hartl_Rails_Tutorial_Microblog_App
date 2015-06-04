@@ -9,7 +9,7 @@ describe "User pages" do
     it { should have_title(full_title('Sign up')) }
   end
 
-  describe 'signup' do 
+  describe 'signup page' do
     before { visit signup_path }
 
     let(:submit) { 'Create my account' }
@@ -19,6 +19,14 @@ describe "User pages" do
         expect { click_button submit }.not_to change(User, :count)
       end
 
+        describe 'after submission' do
+          before { click_button submit }
+
+          it { should have_title('Sign up') }
+          it { should have_content( 'error') }
+          it { should have_content( 'The form contains 5 errors.' ) }
+          it { should have_content( 'Email is invalid' ) }
+        end
       describe 'with valid information' do
         before do
           fill_in 'Name', with: 'Example User'
@@ -29,6 +37,15 @@ describe "User pages" do
 
         it 'should create a user' do
           expect { click_button submit }.to change(User, :count).by(1)
+        end
+
+        describe 'after saving the user' do
+          before { click_button submit }
+          let(:user) { User.find_by(email: 'user@example.com') }
+
+          it { should have_title(user.name) }
+          it { should have_content( 'Welcome to the Sample App!') }
+          it { should have_content('Example User') }
         end
       end
     end
