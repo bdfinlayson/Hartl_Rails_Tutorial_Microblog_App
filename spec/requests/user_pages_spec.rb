@@ -45,6 +45,7 @@ describe "User pages" do
 
           it { should have_title(user.name) }
           it { should have_content( 'Welcome to the Sample App!') }
+          it { should have_selector( 'div.alert.alert-success', text: 'Welcome to the Sample App!') }
           it { should have_content('Example User') }
         end
       end
