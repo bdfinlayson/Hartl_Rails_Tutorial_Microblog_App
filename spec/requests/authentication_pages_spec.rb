@@ -47,6 +47,21 @@ describe 'Authentication' do
 
   describe 'authorization' do
 
+    describe 'as signed-in user' do
+      let(:user) { FactoryGirl.create(:user) }
+      before { sign_in user, no_capybara: true }
+
+      describe 'cannot access #new action' do
+        before { get new_user_path }
+        specify { expect(response).to redirect_to(root_path) }
+      end
+
+      describe 'cannot access #create action' do
+        before { post users_path(user) }
+        specify { expect(response).to redirect_to(root_path) }
+      end
+    end
+
     describe 'as non-admin user' do
       let(:user) { FactoryGirl.create(:user) }
       let(:non_admin) { FactoryGirl.create(:user) }
@@ -61,39 +76,55 @@ describe 'Authentication' do
 
     describe 'for non-signed-in users' do
       let(:user) { FactoryGirl.create(:user) }
+      before do
+        visit signin_path
+      end
+
+      it { should_not have_link('Profile', href: user_path(user)) }
+      it { should_not have_link('Settings', href: edit_user_path(user)) }
 
       describe 'when attempting to visit a protected page' do
         before do
           visit edit_user_path(user)
-          fill_in 'Email', with: user.email
-          fill_in 'Password', with: user.password
-          click_button 'Sign in'
+          sign_in user
         end
 
-         describe 'after signing in' do
-           it 'it should render the desired second page' do
-             expect(page).to have_title('Edit user')
-           end
-         end
+        describe 'after signing in' do
+          it "should render the desired protected page" do
+            expect(page).to have_title('Edit user')
+          end
+
+          describe "when signing in again" do
+            before do
+              click_link "Sign out"
+              visit signin_path
+              sign_in user
+            end
+
+            it "should render the default (profile) page" do
+              expect(page).to have_title(user.name)
+            end
+          end
+        end
       end
 
-       describe 'in the Users controller' do
+      describe 'in the Users controller' do
 
-         describe 'visiting the user index' do
-           before { visit users_path }
-           it { should have_title('Sign in') }
-         end
+        describe 'visiting the user index' do
+          before { visit users_path }
+          it { should have_title('Sign in') }
+        end
 
-         describe 'visiting the edit page' do
-           before { visit edit_user_path(user) }
-           it { should have_title('Sign in') }
-         end
+        describe 'visiting the edit page' do
+          before { visit edit_user_path(user) }
+          it { should have_title('Sign in') }
+        end
 
-         describe 'submitting to the update action' do
-           before { patch user_path(user) }
-           specify { expect(response).to redirect_to(signin_path) }
-         end
-       end
+        describe 'submitting to the update action' do
+          before { patch user_path(user) }
+          specify { expect(response).to redirect_to(signin_path) }
+        end
+      end
     end
 
     describe 'as wrong user' do
