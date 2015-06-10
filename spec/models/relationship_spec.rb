@@ -22,7 +22,7 @@ RSpec.describe Relationship, type: :model do
   end
 
   describe 'when follower id is not present' do
-    before { Relationship.follower_id = nil }
+    before { relationship.follower_id = nil }
     it { should_not be_valid }
   end
 end
